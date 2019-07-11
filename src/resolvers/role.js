@@ -31,7 +31,7 @@ export default {
     ),
 
     deleteRole: combineResolvers(
-      isAdmin,
+      isAuthenticated,
       async (parent, { id }, { models }) => {
         return await models.Role.destroy({ where: { id } });
       },

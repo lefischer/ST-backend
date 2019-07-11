@@ -66,7 +66,7 @@ export default {
     ),
 
     deleteMessage: combineResolvers(
-      isAdmin,
+      isAuthenticated,
       async (parent, { id }, { models }) => {
         return await models.Message.destroy({ where: { id } });
       },
@@ -74,11 +74,11 @@ export default {
   },
 
   Message: {
-    user: async (message, args, { loaders }) => {
-      return await loaders.user.load(message.userId);
+    user: async (message, args, { models }) => {
+      return await models.User.findById(message.userId);
     },
-    chat: async (message, args, { loaders }) => {
-      return await loaders.chat.load(message.chatId);
+    chat: async (message, args, { models }) => {
+      return await models.Chat.findById(message.chatId);
     },
   },
 

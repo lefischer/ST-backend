@@ -3,6 +3,7 @@ import { gql } from 'apollo-server-express';
 export default gql`
   extend type Query {
     tickets(cursor: String, limit: Int): TicketConnection!
+    userTickets(userId: ID!, cursor: String, limit: Int): TicketConnection!
     ticket(id: ID!): Ticket!
   }
 
@@ -12,9 +13,11 @@ export default gql`
       service: String!,
       description: String!,
       priority: String!,
-      userId: ID!,
+      ownerId: ID!,
       clientId: ID!): Ticket!
-    updateTicket(stateId: ID!, id: ID!): Ticket!
+    updateState(stateId: ID!, id: ID!): Ticket!
+    updateDate(date: String!, id: ID!): Ticket!
+    updateSupervisor(supervisor: ID!, id: ID!): Ticket!
     deleteTicket(id: ID!): Boolean!
   }
 
@@ -33,7 +36,10 @@ export default gql`
     createdAt: Date!
     chat: Chat!
     client: Client!
-    user: User
+    owner: User!
+    datetime: Date
+    supervisor: User
+    assignation: User
   }
 
   extend type Subscription {

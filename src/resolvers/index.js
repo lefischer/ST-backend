@@ -7,6 +7,7 @@ import ticketResolvers from './ticket';
 import clientResolvers from './client';
 import stateResolvers from './state';
 import chatResolvers from './chat';
+import assignationResolvers from './assignation';
 
 const customScalarResolver = {
   Date: GraphQLDateTime,
@@ -21,4 +22,5 @@ export default [
   clientResolvers,
   stateResolvers,
   chatResolvers,
+  assignationResolvers,
 ];

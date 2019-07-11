@@ -176,7 +176,7 @@ export default {
     ),
 
     deleteUser: combineResolvers(
-      isAdmin,
+      isAuthenticated,
       async (parent, { id }, { models }) => {
         return await models.User.destroy({
           where: { id },

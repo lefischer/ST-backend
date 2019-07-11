@@ -11,7 +11,7 @@ const fromCursorHash = string =>
 
 export default {
   Query: {
-    states: async (parent, { cursor, limit = 100 }, { models }) => {
+    states: async (parent, { models }) => {
       return await models.State.findAll()
     },
     state: async (parent, { id }, { models }) => {
@@ -21,7 +21,7 @@ export default {
 
   Mutation: {
     createState: combineResolvers(
-      isAdmin,
+      isAuthenticated,
       async (parent, { state }, { models}) => {
         const thisState = await models.State.create({
           state
@@ -32,7 +32,7 @@ export default {
     ),
 
     deleteState: combineResolvers(
-      isAdmin,
+      isAuthenticated,
       async (parent, { id }, { models }) => {
         return await models.State.destroy({ where: { id } });
       },

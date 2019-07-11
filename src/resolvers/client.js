@@ -113,7 +113,7 @@ export default {
 
   Mutation: {
     createClient: combineResolvers(
-      isAdmin,
+      isAuthenticated,
       async (parent, {name, address, email, phone}, { models, me }) => {
         const client = await models.Client.create({
           name: name,
@@ -127,7 +127,7 @@ export default {
     ),
 
     deleteClient: combineResolvers(
-      isAdmin,
+      isAuthenticated,
       async (parent, { id }, { models }) => {
         return await models.Client.destroy({ where: { id } });
       },

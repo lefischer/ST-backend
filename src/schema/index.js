@@ -7,6 +7,7 @@ import clientSchema from './client';
 import ticketSchema from './ticket';
 import stateSchema from './state';
 import chatSchema from './chat';
+import assignationSchema from './assignation';
 
 
 const linkSchema = gql`
@@ -34,4 +35,5 @@ export default [
   ticketSchema,
   stateSchema,
   chatSchema,
+  assignationSchema,
 ];
