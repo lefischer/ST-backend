@@ -27,14 +27,17 @@ const user = (sequelize, DataTypes) => {
         len: [7, 42],
       },
     },
-    role: {
+    phone: {
       type: DataTypes.STRING,
     },
   });
 
   User.associate = models => {
     User.hasMany(models.Message, { onDelete: 'CASCADE' });
-  };
+    User.hasMany(models.UserRole, { onDelete: 'CASCADE' });
+    User.hasMany(models.Assignation, { onDelete: 'CASCADE' });
+    User.belongsTo(models.Client)
+  }
 
   User.findByLogin = async login => {
     let user = await User.findOne({
