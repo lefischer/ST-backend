@@ -2,7 +2,7 @@ import Sequelize from 'sequelize';
 import { combineResolvers } from 'graphql-resolvers';
 
 import pubsub, { EVENTS } from '../subscription';
-import { isAuthenticated, isMessageOwner } from './authorization';
+import { isAuthenticated, isMessageOwner, isAdmin } from './authorization';
 
 const toCursorHash = string => Buffer.from(string).toString('base64');
 
@@ -11,13 +11,14 @@ const fromCursorHash = string =>
 
 export default {
   Query: {
-    messages: async (parent, { cursor, limit = 100 }, { models }) => {
+    messages: async (parent, { chatId, cursor, limit = 100 }, { models }) => {
       const cursorOptions = cursor
         ? {
             where: {
               createdAt: {
                 [Sequelize.Op.lt]: fromCursorHash(cursor),
               },
+              chatId: chatId
             },
           }
         : {};
@@ -49,9 +50,10 @@ export default {
   Mutation: {
     createMessage: combineResolvers(
       isAuthenticated,
-      async (parent, { text }, { models, me }) => {
+      async (parent, { text, chatId }, { models, me }) => {
         const message = await models.Message.create({
           text,
+          chatId,
           userId: me.id,
         });
 
@@ -64,8 +66,7 @@ export default {
     ),
 
     deleteMessage: combineResolvers(
-      isAuthenticated,
-      isMessageOwner,
+      isAdmin,
       async (parent, { id }, { models }) => {
         return await models.Message.destroy({ where: { id } });
       },
@@ -75,6 +76,9 @@ export default {
   Message: {
     user: async (message, args, { loaders }) => {
       return await loaders.user.load(message.userId);
+    },
+    chat: async (message, args, { loaders }) => {
+      return await loaders.chat.load(message.chatId);
     },
   },
 
