@@ -11,7 +11,7 @@ const fromCursorHash = string =>
 
 export default {
   Query: {
-    roles: async (parent, { cursor, limit = 100 }, { models }) => {
+    roles: async (parent, { }, { models }) => {
       return await models.Role.findAll()
     },
     role: async (parent, { id }, { models }) => {

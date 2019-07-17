@@ -11,7 +11,7 @@ const fromCursorHash = string =>
 
 export default {
   Query: {
-    states: async (parent, { models }) => {
+    states: async (parent, {}, { models }) => {
       return await models.State.findAll()
     },
     state: async (parent, { id }, { models }) => {

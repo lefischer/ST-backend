@@ -119,7 +119,7 @@ export default {
       });
 
 
-      return { token: createToken(user, secret, '7d') };
+      return { token: createToken(user, secret, '24h') };
     },
 
     signIn: async (
@@ -141,7 +141,7 @@ export default {
         throw new AuthenticationError('Invalid password.');
       }
 
-      return { token: createToken(user, secret, '7d') };
+      return { token: createToken(user, secret, '24h') };
     },
 
     createUser: async (
