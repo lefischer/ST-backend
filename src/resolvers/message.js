@@ -36,7 +36,7 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: => {
+          endCursor: () => {
             if (edges[edges.length - 1]) {
               return toCursorHash(
                 edges[edges.length - 1].createdAt.toString(),

@@ -37,7 +37,7 @@ export default gql`
     id: ID!
     username: String!
     email: String!
-    phone: String!
+    phone: String
     roles: [Role!]
   }
 `;

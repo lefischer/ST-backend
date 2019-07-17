@@ -34,7 +34,7 @@ export default gql`
     description: String!
     state: State!
     createdAt: Date!
-    chat: Chat!
+    chat: Chat
     client: Client!
     owner: User!
     datetime: Date
