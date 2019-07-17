@@ -13,7 +13,7 @@ export default gql`
       username: String!,
       email: String!,
       password: String!,
-      roles: [ID!],
+      roles: [ID!]!,
       phone: String,
       client: ID,
     ): Token!

@@ -21,7 +21,7 @@ export default gql`
   type Client {
     id: ID!
     name: String!
-    adress: String!
+    address: String!
     phone: String
     email: String
     createdAt: Date!
