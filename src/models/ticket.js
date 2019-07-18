@@ -22,6 +22,9 @@ const ticket = (sequelize, DataTypes) => {
     },
     datetime: {
       type: DataTypes.DATE
+    },
+    signature: {
+      type: DataTypes.TEXT,
     }
 
   });

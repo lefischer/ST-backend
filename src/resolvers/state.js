@@ -4,6 +4,7 @@ import { combineResolvers } from 'graphql-resolvers';
 import pubsub, { EVENTS } from '../subscription';
 import { isAuthenticated, isAdmin} from './authorization';
 
+
 const toCursorHash = string => Buffer.from(string).toString('base64');
 
 const fromCursorHash = string =>

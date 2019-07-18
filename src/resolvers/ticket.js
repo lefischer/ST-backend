@@ -140,6 +140,15 @@ export default {
       }
     ),
 
+    updateSignature: combineResolvers (
+      isAuthenticated,
+      async (parent, {signature, id}, {models}) => {
+        const ticket = await models.Ticket.findById(id)
+
+        return await ticket.update({signature})
+      }
+    ),
+
     updateSupervisor: combineResolvers (
       isAuthenticated,
       async (parent, {supervisor, id}, {models}) => {

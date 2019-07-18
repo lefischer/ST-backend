@@ -93,6 +93,14 @@ export default {
       isAuthenticated,
       async (parent, { userId, ticketId}, { models, me }) => {
 
+        const ticket = await models.Ticket.findById(ticketId)
+
+        if (ticket.assignation != null){
+
+          const old = await models.aAssignation.findById(ticket.assignation.id)
+          await old.update({active: false})
+        }
+
         const assignation = await models.Assignation.create({
           userId,
           ticketId,
