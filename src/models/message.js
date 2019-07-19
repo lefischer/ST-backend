@@ -4,6 +4,12 @@ const message = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       validate: { notEmpty: true },
     },
+    lat: {
+      type: DataTypes.FLOAT,
+    },
+    lon: {
+      type: DataTypes.FLOAT,
+    }
   });
 
   Message.associate = models => {

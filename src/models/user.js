@@ -30,6 +30,9 @@ const user = (sequelize, DataTypes) => {
     phone: {
       type: DataTypes.STRING,
     },
+    pushToken: {
+      type: DataTypes.STRING,
+    },
   });
 
   User.associate = models => {

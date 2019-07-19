@@ -35,9 +35,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
@@ -49,10 +55,14 @@ export default {
               createdAt: {
                 [Sequelize.Op.lt]: fromCursorHash(cursor),
               },
-              owner: userId,
+              ownerId: userId,
             },
           }
-        : {};
+        : {
+            where: {
+              ownerId: userId,
+            },
+        };
 
       const tickets = await models.Ticket.findAll({
         order: [['createdAt', 'DESC']],
@@ -67,9 +77,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
@@ -140,15 +156,6 @@ export default {
       }
     ),
 
-    updateSignature: combineResolvers (
-      isAuthenticated,
-      async (parent, {signature, id}, {models}) => {
-        const ticket = await models.Ticket.findById(id)
-
-        return await ticket.update({signature})
-      }
-    ),
-
     updateSupervisor: combineResolvers (
       isAuthenticated,
       async (parent, {supervisor, id}, {models}) => {
@@ -190,6 +197,13 @@ export default {
       } else {
         return null
       }
+    },
+    signature: async (ticket, args, {models}) => {
+       return await models.Signature.findOne({
+         where: {
+           ticketId: ticket.id
+         }
+       })
     },
     assignation: async (ticket, args, { models }) => {
        const assignation = await models.Assignation.findOne({

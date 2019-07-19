@@ -37,14 +37,14 @@ export default {
         pageInfo: {
           hasNextPage,
           endCursor: () => {
-            if (edges[edges.length - 1]) {
+            if (edges.length > 0){
               return toCursorHash(
                 edges[edges.length - 1].createdAt.toString(),
               )
             } else {
-              return ""
+              return toCursorHash("")
             }
-          }
+          },
         },
       };
     },
@@ -56,10 +56,12 @@ export default {
   Mutation: {
     createMessage: combineResolvers(
       isAuthenticated,
-      async (parent, { text, chatId }, { models, me }) => {
+      async (parent, { text, chatId,  lat, lon}, { models, me }) => {
         const message = await models.Message.create({
           text,
           chatId,
+          lat,
+          lon,
           userId: me.id,
         });
 

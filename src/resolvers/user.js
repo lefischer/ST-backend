@@ -39,9 +39,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
@@ -124,7 +130,7 @@ export default {
 
     signIn: async (
       parent,
-      { login, password },
+      { login, password, pushToken },
       { models, secret },
     ) => {
       const user = await models.User.findByLogin(login);
@@ -139,6 +145,11 @@ export default {
 
       if (!isValid) {
         throw new AuthenticationError('Invalid password.');
+      }
+
+      console.log(`Token recivido ${pushToken}`);
+      if (pushToken){
+        await user.update({ pushToken });
       }
 
       return { token: createToken(user, secret, '24h') };
@@ -173,6 +184,14 @@ export default {
         const user = await models.User.findById(me.id);
         return await user.update({ username });
       },
+    ),
+
+    updatePushToken: combineResolvers (
+      isAuthenticated,
+      async (parent, { pushToken }, { models, me }) => {
+        const user = await models.User.findById(me.id);
+        return await user.update({ pushToken });
+      }
     ),
 
     deleteUser: combineResolvers(

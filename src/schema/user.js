@@ -18,9 +18,10 @@ export default gql`
       client: ID,
     ): Token!
 
-    signIn(login: String!, password: String!): Token!
+    signIn(login: String!, password: String!, pushToken: String): Token!
     createUser( username: String!, email: String!, password: String!, roles: [ID!], phone: String, client: ID): User!
     updateUser(username: String!): User!
+    updatePushToken(pushToken: String!): User!
     deleteUser(id: ID!): Boolean!
   }
 
@@ -38,6 +39,7 @@ export default gql`
     username: String!
     email: String!
     phone: String
+    pushToken: String
     roles: [Role!]
   }
 `;

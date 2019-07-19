@@ -35,9 +35,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
@@ -56,7 +62,11 @@ export default {
               clientId: id
             },
           }
-        : {};
+        : {
+            where: {
+              clientId: id,
+            }
+          };
 
       const tickets = await models.Ticket.findAll({
         order: [['createdAt', 'DESC']],
@@ -71,9 +81,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
@@ -88,7 +104,11 @@ export default {
               clientId: id
             },
           }
-        : {};
+        : {
+          where: {
+            clientId: id,
+          }
+        };
 
       const users = await users.Ticket.findAll({
         order: [['createdAt', 'DESC']],
@@ -103,9 +123,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },

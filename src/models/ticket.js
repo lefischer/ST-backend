@@ -23,10 +23,6 @@ const ticket = (sequelize, DataTypes) => {
     datetime: {
       type: DataTypes.DATE
     },
-    signature: {
-      type: DataTypes.TEXT,
-    }
-
   });
 
   Ticket.associate = models => {
@@ -37,6 +33,7 @@ const ticket = (sequelize, DataTypes) => {
     Ticket.hasMany(models.Assignation, { onDelete: 'CASCADE' });
     Ticket.belongsTo(models.State);
     Ticket.hasOne(models.Chat, { onDelete: 'NO ACTION' });
+    Ticket.hasOne(models.Signature, { onDelete: 'NO ACTION' });
   };
 
   return Ticket;

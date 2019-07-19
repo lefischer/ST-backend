@@ -26,7 +26,8 @@ const models = {
   State: sequelize.import('./state'),
   TicketState: sequelize.import('./ticketState'),
   Chat: sequelize.import('./chat'),
-  Assignation: sequelize.import('./assignation')
+  Assignation: sequelize.import('./assignation'),
+  Signature: sequelize.import('./signature'),
 };
 
 Object.keys(models).forEach(key => {

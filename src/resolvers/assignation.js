@@ -36,14 +36,21 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
 
     userAssignations: async (parent, {userId, cursor, limit = 100 }, { models }) => {
+      console.log("Tickets Asignados a un usuario");
       const cursorOptions = cursor
         ? {
             where: {
@@ -53,7 +60,11 @@ export default {
               userId: userId,
             },
           }
-        : {};
+        : {
+            where: {
+              userId: userId,
+            }
+          };
 
       const assignations = await models.Assignation.findAll({
         order: [['createdAt', 'DESC']],
@@ -68,9 +79,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },

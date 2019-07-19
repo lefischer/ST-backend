@@ -18,7 +18,6 @@ export default gql`
     updateState(stateId: ID!, id: ID!): Ticket!
     updateDate(date: String!, id: ID!): Ticket!
     updateSupervisor(supervisor: ID!, id: ID!): Ticket!
-    updateSignature(signature: String!, id: ID!): Ticket!
     deleteTicket(id: ID!): Boolean!
   }
 
@@ -41,7 +40,7 @@ export default gql`
     datetime: Date
     supervisor: User
     assignation: User
-    signature: String
+    signature: Signature
   }
 
   extend type Subscription {
