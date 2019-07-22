@@ -161,6 +161,8 @@ export default {
       async (parent, {supervisor, id}, {models}) => {
         const ticket = await models.Ticket.findById(id)
 
+        console.log(ticket);
+
         return await ticket.update({supervisorId: supervisor})
       }
     ),

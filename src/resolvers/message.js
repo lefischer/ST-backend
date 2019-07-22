@@ -4,6 +4,8 @@ import { combineResolvers } from 'graphql-resolvers';
 import pubsub, { EVENTS } from '../subscription';
 import { isAuthenticated, isMessageOwner, isAdmin } from './authorization';
 
+import sendNotification from '../pushNotifications'
+
 const toCursorHash = string => Buffer.from(string).toString('base64');
 
 const fromCursorHash = string =>
@@ -65,9 +67,47 @@ export default {
           userId: me.id,
         });
 
-        pubsub.publish(EVENTS.MESSAGE.CREATED, {
-          messageCreated: { message },
-        });
+        const chat = await models.Chat.findOne({
+          where: {
+            id: chatId
+          },
+          include: [{
+            model: models.Ticket,
+
+          }]
+        })
+
+        if (me.id == chat.ticket.supervisorId){
+          const assignation = await models.Assignation.findOne({
+            where: {
+              ticketId: chat.ticket.id,
+              active: true
+            }
+          })
+
+          // console.log(assignation.userId);
+
+          if (assignation){
+            const user = await models.User.findById(assignation.userId)
+            // console.log(user.username);
+
+            if( user ) {
+              const pushTokens = [user.pushToken]
+              const title = "Mensaje Nuevo"
+              const body = text
+              const data = {
+                type: 0,
+                sender: me.username,
+                text: text,
+                createdAt: message.createdAt,
+                ticketId: chat.ticket.id
+              }
+
+              // console.log(data);
+              sendNotification(pushTokens, title, body, data)
+            }
+          }
+        }
 
         return message;
       },

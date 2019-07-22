@@ -6,6 +6,8 @@ import { isAuthenticated, isAdmin, isAssignationOwner } from './authorization';
 
 const toCursorHash = string => Buffer.from(string).toString('base64');
 
+import sendNotification from '../pushNotifications'
+
 const fromCursorHash = string =>
   Buffer.from(string, 'base64').toString('ascii');
 
@@ -112,17 +114,43 @@ export default {
 
         const ticket = await models.Ticket.findById(ticketId)
 
-        if (ticket.assignation != null){
+        const assignations = await models.Assignation.findAll({
+          where: {
+            ticketId: ticketId,
+            active: true
+          }
+        });
 
-          const old = await models.aAssignation.findById(ticket.assignation.id)
-          await old.update({active: false})
+
+        const title = "Asignacion Eliminada"
+        const body = `Se ha eliminado la asignacion al ticket con id ${ticketId}`
+        const data = {
+          type: 3,
+          ticketId: ticketId
         }
+
+        assignations.forEach(async (assignation) => {
+          await assignation.update({active: false});
+          const user = await models.User.findById(assignation.userId);
+          sendNotification([user.pushToken], title, body, data)
+        })
 
         const assignation = await models.Assignation.create({
           userId,
           ticketId,
           active: true,
         });
+
+        const assignation_user = await models.User.findById(userId)
+        const assignation_pushTokens = [assignation_user.pushToken]
+        const assignation_title = "Nueva asignacion"
+        const assignation_body = `Se ha asignado un nuevo ticket ha ${assignation_user.username}`
+        const assignation_data = {
+          type: 1,
+          ticketId: ticketId
+        }
+
+        sendNotification(assignation_pushTokens, assignation_title, assignation_body, assignation_data)
 
         return assignation;
       },
@@ -134,6 +162,17 @@ export default {
         const assignation = models.Assignation.findById(id)
 
         const active = false
+
+        const user = model.User.findById(assignation.userId);
+        const pushTokens = [user.pushToken]
+        const title = "Asignacion Eliminada"
+        const body = `Se ha eliminado la asignacion al ticket con id ${assignation.ticketId}`
+        const data = {
+          type: 3,
+          ticketId: ticketId
+        }
+        sendNotification(pushTokens, title, body, data)
+
         return await assignation.update({active})
       }
     ),
