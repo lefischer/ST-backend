@@ -5,6 +5,7 @@ import pubsub, { EVENTS } from '../subscription';
 import { isAuthenticated, isMessageOwner, isAdmin } from './authorization';
 
 import sendNotification from '../pushNotifications'
+import proccessMessage from '../messages'
 
 const toCursorHash = string => Buffer.from(string).toString('base64');
 
@@ -107,6 +108,9 @@ export default {
               sendNotification(pushTokens, title, body, data)
             }
           }
+        } else {
+          // respuesta de bot
+          return proccessMessage(message, chatId, chat.ticket, me, models)
         }
 
         return message;

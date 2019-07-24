@@ -41,6 +41,8 @@ export default gql`
     supervisor: User
     assignation: User
     signature: Signature
+    otrId: Int
+    sla: Int
   }
 
   extend type Subscription {

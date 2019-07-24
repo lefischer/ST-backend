@@ -3,6 +3,7 @@ import { combineResolvers } from 'graphql-resolvers';
 
 import pubsub, { EVENTS } from '../subscription';
 import { isAuthenticated, isAdmin, isTicketOwner } from './authorization';
+import sendNotification from '../pushNotifications'
 
 const toCursorHash = string => Buffer.from(string).toString('base64');
 
@@ -101,7 +102,7 @@ export default {
       async (parent, { type, service, priority, description, ownerId, clientId }, { models, me }) => {
         const state = await models.State.findOne({
           where: {
-            state: "created"
+            state: "creado"
           }
         })
 
@@ -152,7 +153,36 @@ export default {
         const ticket = await models.Ticket.findById(id)
         const datetime = Date.parse(date)
 
-        return await ticket.update({datetime})
+        const state = await models.State.findOne({
+          where: {
+            state: "coordinado"
+          }
+        })
+
+        const assignation = await models.Assignation.findOne({
+          where: {
+            ticketId: id,
+            active: true
+          }
+        });
+
+        if (assignation) {
+
+          const user =  await models.User.findById(assignation.userId)
+          const pushTokens = [user.pushToken]
+
+          const update_title = `Ticket actualizado`
+          const update_body = `Se ha coordinado el ticket con id ${ticket.id}.`
+          const update_data = {
+            type: 2,
+            ticketId: ticket.id
+          }
+
+          sendNotification(pushTokens, update_title, update_body, update_data)
+        }
+
+
+        return await ticket.update({datetime, stateId: state.id})
       }
     ),
 

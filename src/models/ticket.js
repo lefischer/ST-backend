@@ -23,6 +23,12 @@ const ticket = (sequelize, DataTypes) => {
     datetime: {
       type: DataTypes.DATE
     },
+    otrsId: {
+      type: DataTypes.INTEGER,
+    },
+    sla: {
+      type: DataTypes.INTEGER,
+    }
   });
 
   Ticket.associate = models => {

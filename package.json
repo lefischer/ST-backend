@@ -1,5 +1,5 @@
 {
-  "name": "fullstack-apollo-express-postgresql-boilerplate",
+  "name": "st-backend-sinlimites",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -13,8 +13,6 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "keywords": [],
-  "author": "Robin Wieruch <hello@rwieruch.com> (https://www.robinwieruch.de)",
-  "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.1.6",
     "@babel/node": "^7.0.0",

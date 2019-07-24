@@ -114,6 +114,14 @@ export default {
 
         const ticket = await models.Ticket.findById(ticketId)
 
+        const state = await models.State.findOne({
+          where: {
+            state: "asignado"
+          }
+        })
+
+        await ticket.update({stateId: state.id})
+
         const assignations = await models.Assignation.findAll({
           where: {
             ticketId: ticketId,
@@ -171,6 +179,25 @@ export default {
           type: 3,
           ticketId: ticketId
         }
+
+        const ticket = await models.Ticket.findById(ticketId)
+
+        if (ticket.datetime){
+          const state = await models.State.findOne({
+            where: {
+              state: "coordinado"
+            }
+          })
+        } else {
+          const state = await models.State.findOne({
+            where: {
+              state: "creado"
+            }
+          })
+        }
+        
+        await ticket.update({stateId: state.id})
+
         sendNotification(pushTokens, title, body, data)
 
         return await assignation.update({active})

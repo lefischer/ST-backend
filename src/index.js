@@ -15,6 +15,8 @@ import resolvers from './resolvers';
 import models, { sequelize } from './models';
 import loaders from './loaders';
 
+import seeds from './seeds'
+
 const app = express();
 
 app.use(cors());
@@ -91,9 +93,11 @@ const isProduction = !!process.env.DATABASE_URL;
 const port = process.env.PORT || 8000;
 
 sequelize.sync({ force: isTest || isProduction }).then(async () => {
-  if (isTest || isProduction) {
-    createUsersWithMessages(new Date());
-  }
+  // if (isTest || isProduction) {
+  //   createUsersWithMessages(new Date());
+  // }
+
+  await seeds(models);
 
   httpServer.listen({ port }, () => {
     console.log(`Apollo Server on http://localhost:${port}/graphql`);
