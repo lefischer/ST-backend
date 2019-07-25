@@ -110,7 +110,7 @@ export default {
           }
         };
 
-      const users = await users.Ticket.findAll({
+      const users = await models.User.findAll({
         order: [['createdAt', 'DESC']],
         limit: limit + 1,
         ...cursorOptions,

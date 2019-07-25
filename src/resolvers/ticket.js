@@ -91,6 +91,48 @@ export default {
       };
     },
 
+    supervisorTickets : async (parent, { userId, cursor, limit = 100 }, { models }) => {
+      const cursorOptions = cursor
+        ? {
+            where: {
+              createdAt: {
+                [Sequelize.Op.lt]: fromCursorHash(cursor),
+              },
+              supervisorId: userId,
+            },
+          }
+        : {
+            where: {
+              supervisorId: userId,
+            },
+        };
+
+      const tickets = await models.Ticket.findAll({
+        order: [['createdAt', 'DESC']],
+        limit: limit + 1,
+        ...cursorOptions,
+      });
+
+      const hasNextPage = tickets.length > limit;
+      const edges = hasNextPage ? tickets.slice(0, -1) : tickets;
+
+      return {
+        edges,
+        pageInfo: {
+          hasNextPage,
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
+        },
+      };
+    },
+
     ticket: async (parent, { id }, { models }) => {
       return await models.Ticket.findById(id);
     },

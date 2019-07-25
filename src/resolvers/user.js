@@ -73,16 +73,21 @@ export default {
               roleId: id,
             },
           }
-        : {};
+        : {
+          where: {
+            roleId: id
+          }
+
+        };
 
       const userRoles = await models.UserRole.findAll({
         order: [['createdAt', 'DESC']],
         limit: limit + 1,
         ...cursorOptions,
       })
-      const roles_id = userRoles.map(role => role.roleId);
+      const roles_id = userRoles.map(role => role.userId);
 
-      const users = await models.Role.findAll({
+      const users = await models.User.findAll({
         where: {
           id : {$in: roles_id}
         }

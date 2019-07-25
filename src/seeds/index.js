@@ -129,7 +129,7 @@ export default (
       const u20 = await createUser(models,'lucas', 'lucas@st.com', "1234567", "6973376542", [3], client2.id)
       const u21 = await createUser(models,'marcelo', 'marcelo@st.com', "1234567", "6973376542", [3], client2.id)
 
-      const users = [[u00, u01], [u10, u11, u12], [u20, u21]]
+      const c_users = [[u00, u01], [u10, u11, u12], [u20, u21]]
 
       const nTickets = Math.floor((Math.random() * 20) + 20)
 
@@ -137,7 +137,7 @@ export default (
       for (i = 0; i < nTickets; i++) {
         const c =  Math.floor((Math.random() * 2) + 1);
 
-        const u =  users[c - 1][Math.floor((Math.random() * (users[c - 1].length - 1)) + 1)].id
+        const u =  c_users[c - 1][Math.floor((Math.random() * (c_users[c - 1].length - 1)) + 1)].id
 
         const ticket = await createTicket(`ticket ${i}`, `ticket ${i}`, `ticket ${i}`, `ticket ${i}`, u, c, models);
 
