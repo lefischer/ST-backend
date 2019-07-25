@@ -24,7 +24,11 @@ export default {
               chatId: chatId
             },
           }
-        : {};
+        : {
+          where: {
+            chatId: chatId,
+          }
+        };
 
       const messages = await models.Message.findAll({
         order: [['createdAt', 'DESC']],
