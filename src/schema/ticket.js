@@ -3,7 +3,7 @@ import { gql } from 'apollo-server-express';
 export default gql`
   extend type Query {
     tickets(cursor: String, limit: Int): TicketConnection!
-    userTickets(userId: ID!, cursor: String, limit: Int): TicketConnection!
+    userTickets(userId: ID!, cursor: String, limit: Int): TicketConnectionU!
     supervisorTickets(userId: ID!, cursor: String, limit: Int): TicketConnectionS!
     ticket(id: ID!): Ticket!
   }
@@ -26,7 +26,13 @@ export default gql`
     edges: [Ticket!]!
     pageInfo: PageInfo!
   }
+
   type TicketConnectionS {
+    edges: [Ticket!]!
+    pageInfo: PageInfo!
+  }
+
+  type TicketConnectionU {
     edges: [Ticket!]!
     pageInfo: PageInfo!
   }
