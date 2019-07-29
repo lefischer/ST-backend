@@ -134,7 +134,18 @@ export default {
     },
 
     ticket: async (parent, { id }, { models }) => {
-      return await models.Ticket.findById(id);
+      console.log(`buscando ticket con id ${id}`);
+      let ticket
+      while (!ticket) {
+        ticket = await models.Ticket.findOne({
+          where: {id: id}
+        });
+      }
+      console.log(ticket.description);
+      return ticket
+      // return await models.Ticket.findOne({
+      //   where: {id: id}
+      // });
     },
   },
 

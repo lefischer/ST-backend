@@ -1,6 +1,9 @@
 const conts_states = ["creado", "asignado", "coordinado", "en progreso", "terminado", "cerrado"]
 const conts_roles = ["admin", "bot", "cliente", "tecnico", "supervisor"]
 const conts_dates = ["2019-07-23T10:00:00Z", "2019-07-24T10:00:00Z", "2019-07-25T10:00:00Z", "2019-07-26T10:00:00Z"]
+const types = ["hardware", "software"]
+const service = ["incidente", "solicitud"]
+const priority = ["alta", "media", "baja"]
 
 async function createRoles(roles, models) {
 
@@ -135,11 +138,14 @@ export default (
 
       var i;
       for (i = 0; i < nTickets; i++) {
-        const c =  Math.floor((Math.random() * 2) + 1);
+        const c =  Math.floor((Math.random() * 3));
 
-        const u =  c_users[c - 1][Math.floor((Math.random() * (c_users[c - 1].length - 1)) + 1)].id
+        const u =  c_users[c][Math.floor((Math.random() * (c_users[c].length - 1)))].id
 
-        const ticket = await createTicket(`ticket ${i}`, `ticket ${i}`, `ticket ${i}`, `ticket ${i}`, u, c, models);
+        const ticket = await createTicket(types[Math.floor((Math.random() *  (types.length -1)))],
+                                          service[Math.floor((Math.random() * (service.length -1)))],
+                                          priority[Math.floor((Math.random() * (priority.length -1)))],
+                                          `ticket ${i}`, (u + 1), (c + 1), models);
 
         // asinar supervisor
         const s = Math.floor((Math.random() * 3) + 3)
@@ -159,10 +165,10 @@ export default (
 
           await ticket.update({stateId: state.id})
 
-          var userId = Math.floor((Math.random() * 3) + 3);
+          let userId = Math.floor((Math.random() * 3) + 3);
 
-          while ( userId == u) {
-            var userId = Math.floor((Math.random() * 3) + 3);
+          while ( userId == s ) {
+            userId = Math.floor((Math.random() * 3) + 3);
           }
 
           await models.Assignation.create({

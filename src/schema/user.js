@@ -3,7 +3,7 @@ import { gql } from 'apollo-server-express';
 export default gql`
   extend type Query {
     users(cursor: String, limit: Int): UserConnection!
-    usersRole(role: ID!, cursor: String, limit: Int): UserConnection!
+    usersRole(roles: [ID]!, cursor: String, limit: Int): UserConnection!
     user(id: ID!): User
     me: User
   }

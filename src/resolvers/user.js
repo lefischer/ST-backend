@@ -63,19 +63,25 @@ export default {
       return await models.User.findById(me.id);
     },
 
-    usersRole:  async (parent, {id, cursor, limit = 100 }, { models }) => {
+
+    usersRole:  async (parent, {roles, cursor, limit = 100 }, { models }) => {
+
+      const rolesInt = roles.map(role => parseInt(role))
+
+      console.log(rolesInt);
+
       const cursorOptions = cursor
         ? {
             where: {
               createdAt: {
                 [Sequelize.Op.lt]: fromCursorHash(cursor),
               },
-              roleId: id,
+              roleId: {$in: rolesInt},
             },
           }
         : {
           where: {
-            roleId: id
+            roleId: {$in: rolesInt},
           }
 
         };
@@ -100,9 +106,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
