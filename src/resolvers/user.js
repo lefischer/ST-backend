@@ -63,6 +63,31 @@ export default {
       return await models.User.findById(me.id);
     },
 
+    roleUsers: async (parent, {role}, {models}) => {
+
+      const this_role = await models.Role.findOne({
+        where: {
+          role: role
+        }
+      })
+
+      const userRoles = await models.UserRole.findAll({
+        where: {
+          roleId: this_role.id
+        }
+      })
+
+      const roles_id = userRoles.map(role => role.userId);
+
+      const users = await models.User.findAll({
+        where: {
+          id : {$in: roles_id}
+        }
+      });
+
+      return users
+
+    },
 
     usersRole:  async (parent, {roles, cursor, limit = 100 }, { models }) => {
 
@@ -99,17 +124,19 @@ export default {
         }
       });
 
-      const hasNextPage = users.length > limit;
-      const edges = hasNextPage ? users.slice(0, -1) : users;
+      console.log(`limit ${limit} users ${roles_id.length}`);
+      console.log(toCursorHash(userRoles[userRoles.length - 1].createdAt.toString()));
+      const hasNextPage = userRoles.length > limit;
+      const edges =  users;
 
       return {
         edges,
         pageInfo: {
           hasNextPage,
           endCursor: () => {
-            if (edges.length > 0){
+            if (userRoles.length > 0){
               return toCursorHash(
-                edges[edges.length - 1].createdAt.toString(),
+                userRoles[userRoles.length - 1].createdAt.toString(),
               )
             } else {
               return toCursorHash("")

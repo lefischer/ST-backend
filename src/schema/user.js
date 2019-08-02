@@ -4,6 +4,7 @@ export default gql`
   extend type Query {
     users(cursor: String, limit: Int): UserConnection!
     usersRole(roles: [ID]!, cursor: String, limit: Int): UserConnection!
+    roleUsers(role: String!): [User]!
     user(id: ID!): User
     me: User
   }

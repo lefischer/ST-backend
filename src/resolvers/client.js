@@ -28,6 +28,7 @@ export default {
         ...cursorOptions,
       });
 
+      console.log(`limit ${limit} client ${clients.length}`);
       const hasNextPage = clients.length > limit;
       const edges = hasNextPage ? clients.slice(0, -1) : clients;
 
