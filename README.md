@@ -5,7 +5,7 @@ Server Applications:
 * [Basado en Tutorial]((https://www.robinwieruch.de/graphql-apollo-server-tutorial/)
 
 
-## Features of Client + Server
+<!-- ## Features of Client + Server
 
 * React (create-react-app) with Apollo Client
   * Queries, Mutations, Subscriptions
@@ -22,7 +22,7 @@ Server Applications:
   * protected routes (e.g. session-based, role-based)
 * performance optimizations
   * example of using Facebook's dataloader
-* E2E testing
+* E2E testing -->
 
 ## Installation
 
@@ -35,8 +35,6 @@ Server Applications:
 
 #### .env file
 
-Since this boilerplate project is using PostgreSQL, you have to install it for your machine and get a database up and running. You find everything for the set up over here: [Setup PostgreSQL with Sequelize in Express Tutorial](https://www.robinwieruch.de/postgres-express-setup-tutorial). After you have created a database and a database user, you can fill out the environment variables in the *server/.env* file.
-
 ```
 DATABASE=mydatabase
 
@@ -47,10 +45,3 @@ SECRET=asdlplplfwfwefwekwself.2342.dawasdq
 ```
 
 The `SECRET` is just a random string for your authentication. Keep all these information secure by adding the *.env* file to your *.gitignore* file. No third-party should have access to this information.
-
-#### Testing
-
-* adjust `test:run-server` npm script with `TEST_DATABASE` environment variable in package.json to match your testing database name
-  * to match it from package.json: `createdb mytestdatabase` with psql
-* one terminal: npm run test:run-server
-* second terminal: npm run test:execute-test

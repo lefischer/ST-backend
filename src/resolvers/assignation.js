@@ -6,6 +6,8 @@ import { isAuthenticated, isAdmin, isAssignationOwner } from './authorization';
 
 const toCursorHash = string => Buffer.from(string).toString('base64');
 
+import sendNotification from '../pushNotifications'
+
 const fromCursorHash = string =>
   Buffer.from(string, 'base64').toString('ascii');
 
@@ -36,14 +38,21 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
 
     userAssignations: async (parent, {userId, cursor, limit = 100 }, { models }) => {
+      console.log("Tickets Asignados a un usuario");
       const cursorOptions = cursor
         ? {
             where: {
@@ -53,7 +62,11 @@ export default {
               userId: userId,
             },
           }
-        : {};
+        : {
+            where: {
+              userId: userId,
+            }
+          };
 
       const assignations = await models.Assignation.findAll({
         order: [['createdAt', 'DESC']],
@@ -68,9 +81,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
@@ -93,11 +112,53 @@ export default {
       isAuthenticated,
       async (parent, { userId, ticketId}, { models, me }) => {
 
+        const ticket = await models.Ticket.findById(ticketId)
+
+        const state = await models.State.findOne({
+          where: {
+            state: "asignado"
+          }
+        })
+
+        await ticket.update({stateId: state.id})
+
+        const assignations = await models.Assignation.findAll({
+          where: {
+            ticketId: ticketId,
+            active: true
+          }
+        });
+
+
+        const title = "Asignacion Eliminada"
+        const body = `Se ha eliminado la asignacion al ticket con id ${ticketId}`
+        const data = {
+          type: 3,
+          ticketId: ticketId
+        }
+
+        assignations.forEach(async (assignation) => {
+          await assignation.update({active: false});
+          const user = await models.User.findById(assignation.userId);
+          sendNotification([user.pushToken], title, body, data)
+        })
+
         const assignation = await models.Assignation.create({
           userId,
           ticketId,
           active: true,
         });
+
+        const assignation_user = await models.User.findById(userId)
+        const assignation_pushTokens = [assignation_user.pushToken]
+        const assignation_title = "Nueva asignacion"
+        const assignation_body = `Se ha asignado un nuevo ticket ha ${assignation_user.username}`
+        const assignation_data = {
+          type: 1,
+          ticketId: ticketId
+        }
+
+        sendNotification(assignation_pushTokens, assignation_title, assignation_body, assignation_data)
 
         return assignation;
       },
@@ -109,6 +170,36 @@ export default {
         const assignation = models.Assignation.findById(id)
 
         const active = false
+
+        const user = model.User.findById(assignation.userId);
+        const pushTokens = [user.pushToken]
+        const title = "Asignacion Eliminada"
+        const body = `Se ha eliminado la asignacion al ticket con id ${assignation.ticketId}`
+        const data = {
+          type: 3,
+          ticketId: ticketId
+        }
+
+        const ticket = await models.Ticket.findById(ticketId)
+
+        if (ticket.datetime){
+          const state = await models.State.findOne({
+            where: {
+              state: "coordinado"
+            }
+          })
+        } else {
+          const state = await models.State.findOne({
+            where: {
+              state: "creado"
+            }
+          })
+        }
+        
+        await ticket.update({stateId: state.id})
+
+        sendNotification(pushTokens, title, body, data)
+
         return await assignation.update({active})
       }
     ),

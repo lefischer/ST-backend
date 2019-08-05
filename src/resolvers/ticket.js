@@ -3,6 +3,7 @@ import { combineResolvers } from 'graphql-resolvers';
 
 import pubsub, { EVENTS } from '../subscription';
 import { isAuthenticated, isAdmin, isTicketOwner } from './authorization';
+import sendNotification from '../pushNotifications'
 
 const toCursorHash = string => Buffer.from(string).toString('base64');
 
@@ -35,9 +36,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
@@ -49,10 +56,14 @@ export default {
               createdAt: {
                 [Sequelize.Op.lt]: fromCursorHash(cursor),
               },
-              owner: userId,
+              ownerId: userId,
             },
           }
-        : {};
+        : {
+            where: {
+              ownerId: userId,
+            },
+        };
 
       const tickets = await models.Ticket.findAll({
         order: [['createdAt', 'DESC']],
@@ -67,15 +78,74 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
+        },
+      };
+    },
+
+    supervisorTickets : async (parent, { userId, cursor, limit = 100 }, { models }) => {
+      const cursorOptions = cursor
+        ? {
+            where: {
+              createdAt: {
+                [Sequelize.Op.lt]: fromCursorHash(cursor),
+              },
+              supervisorId: userId,
+            },
+          }
+        : {
+            where: {
+              supervisorId: userId,
+            },
+        };
+
+      const tickets = await models.Ticket.findAll({
+        order: [['createdAt', 'DESC']],
+        limit: limit + 1,
+        ...cursorOptions,
+      });
+
+      const hasNextPage = tickets.length > limit;
+      const edges = hasNextPage ? tickets.slice(0, -1) : tickets;
+
+      return {
+        edges,
+        pageInfo: {
+          hasNextPage,
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
 
     ticket: async (parent, { id }, { models }) => {
-      return await models.Ticket.findById(id);
+      console.log(`buscando ticket con id ${id}`);
+      let ticket
+      while (!ticket) {
+        ticket = await models.Ticket.findOne({
+          where: {id: id}
+        });
+      }
+      console.log(ticket.description);
+      return ticket
+      // return await models.Ticket.findOne({
+      //   where: {id: id}
+      // });
     },
   },
 
@@ -85,7 +155,7 @@ export default {
       async (parent, { type, service, priority, description, ownerId, clientId }, { models, me }) => {
         const state = await models.State.findOne({
           where: {
-            state: "created"
+            state: "creado"
           }
         })
 
@@ -136,7 +206,36 @@ export default {
         const ticket = await models.Ticket.findById(id)
         const datetime = Date.parse(date)
 
-        return await ticket.update({datetime})
+        const state = await models.State.findOne({
+          where: {
+            state: "coordinado"
+          }
+        })
+
+        const assignation = await models.Assignation.findOne({
+          where: {
+            ticketId: id,
+            active: true
+          }
+        });
+
+        if (assignation) {
+
+          const user =  await models.User.findById(assignation.userId)
+          const pushTokens = [user.pushToken]
+
+          const update_title = `Ticket actualizado`
+          const update_body = `Se ha coordinado el ticket con id ${ticket.id}.`
+          const update_data = {
+            type: 2,
+            ticketId: ticket.id
+          }
+
+          sendNotification(pushTokens, update_title, update_body, update_data)
+        }
+
+
+        return await ticket.update({datetime, stateId: state.id})
       }
     ),
 
@@ -144,6 +243,8 @@ export default {
       isAuthenticated,
       async (parent, {supervisor, id}, {models}) => {
         const ticket = await models.Ticket.findById(id)
+
+        // console.log(ticket);
 
         return await ticket.update({supervisorId: supervisor})
       }
@@ -181,6 +282,13 @@ export default {
       } else {
         return null
       }
+    },
+    signature: async (ticket, args, {models}) => {
+       return await models.Signature.findOne({
+         where: {
+           ticketId: ticket.id
+         }
+       })
     },
     assignation: async (ticket, args, { models }) => {
        const assignation = await models.Assignation.findOne({

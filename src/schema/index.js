@@ -8,6 +8,7 @@ import ticketSchema from './ticket';
 import stateSchema from './state';
 import chatSchema from './chat';
 import assignationSchema from './assignation';
+import signatureSchema from './signature';
 
 
 const linkSchema = gql`
@@ -36,4 +37,5 @@ export default [
   stateSchema,
   chatSchema,
   assignationSchema,
+  signatureSchema,
 ];

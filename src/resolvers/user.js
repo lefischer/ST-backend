@@ -39,9 +39,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
@@ -57,41 +63,85 @@ export default {
       return await models.User.findById(me.id);
     },
 
-    usersRole:  async (parent, {id, cursor, limit = 100 }, { models }) => {
+    roleUsers: async (parent, {role}, {models}) => {
+
+      const this_role = await models.Role.findOne({
+        where: {
+          role: role
+        }
+      })
+
+      const userRoles = await models.UserRole.findAll({
+        where: {
+          roleId: this_role.id
+        }
+      })
+
+      const roles_id = userRoles.map(role => role.userId);
+
+      const users = await models.User.findAll({
+        where: {
+          id : {$in: roles_id}
+        }
+      });
+
+      return users
+
+    },
+
+    usersRole:  async (parent, {roles, cursor, limit = 100 }, { models }) => {
+
+      const rolesInt = roles.map(role => parseInt(role))
+
+      console.log(rolesInt);
+
       const cursorOptions = cursor
         ? {
             where: {
               createdAt: {
                 [Sequelize.Op.lt]: fromCursorHash(cursor),
               },
-              roleId: id,
+              roleId: {$in: rolesInt},
             },
           }
-        : {};
+        : {
+          where: {
+            roleId: {$in: rolesInt},
+          }
+
+        };
 
       const userRoles = await models.UserRole.findAll({
         order: [['createdAt', 'DESC']],
         limit: limit + 1,
         ...cursorOptions,
       })
-      const roles_id = userRoles.map(role => role.roleId);
+      const roles_id = userRoles.map(role => role.userId);
 
-      const users = await models.Role.findAll({
+      const users = await models.User.findAll({
         where: {
           id : {$in: roles_id}
         }
       });
 
-      const hasNextPage = users.length > limit;
-      const edges = hasNextPage ? users.slice(0, -1) : users;
+      console.log(`limit ${limit} users ${roles_id.length}`);
+      console.log(toCursorHash(userRoles[userRoles.length - 1].createdAt.toString()));
+      const hasNextPage = userRoles.length > limit;
+      const edges =  users;
 
       return {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (userRoles.length > 0){
+              return toCursorHash(
+                userRoles[userRoles.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
@@ -119,12 +169,12 @@ export default {
       });
 
 
-      return { token: createToken(user, secret, '7d') };
+      return { token: createToken(user, secret, '24h') };
     },
 
     signIn: async (
       parent,
-      { login, password },
+      { login, password, pushToken },
       { models, secret },
     ) => {
       const user = await models.User.findByLogin(login);
@@ -141,7 +191,12 @@ export default {
         throw new AuthenticationError('Invalid password.');
       }
 
-      return { token: createToken(user, secret, '7d') };
+      console.log(`Token recivido ${pushToken}`);
+      if (pushToken){
+        await user.update({ pushToken });
+      }
+
+      return { token: createToken(user, secret, '24h') };
     },
 
     createUser: async (
@@ -173,6 +228,14 @@ export default {
         const user = await models.User.findById(me.id);
         return await user.update({ username });
       },
+    ),
+
+    updatePushToken: combineResolvers (
+      isAuthenticated,
+      async (parent, { pushToken }, { models, me }) => {
+        const user = await models.User.findById(me.id);
+        return await user.update({ pushToken });
+      }
     ),
 
     deleteUser: combineResolvers(

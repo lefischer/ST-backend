@@ -7,7 +7,7 @@ export default gql`
   }
 
   extend type Mutation {
-    createMessage(text: String!, chatId: ID!): Message!
+    createMessage(text: String!, chatId: ID!, lat: Float, lon: Float): Message!
     deleteMessage(id: ID!): Boolean!
   }
 
@@ -24,6 +24,8 @@ export default gql`
   type Message {
     id: ID!
     text: String!
+    lat: Float
+    lon: Float
     chat: Chat!
     createdAt: Date!
     user: User!

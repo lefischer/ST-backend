@@ -28,6 +28,7 @@ export default {
         ...cursorOptions,
       });
 
+      console.log(`limit ${limit} client ${clients.length}`);
       const hasNextPage = clients.length > limit;
       const edges = hasNextPage ? clients.slice(0, -1) : clients;
 
@@ -35,9 +36,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
@@ -56,7 +63,11 @@ export default {
               clientId: id
             },
           }
-        : {};
+        : {
+            where: {
+              clientId: id,
+            }
+          };
 
       const tickets = await models.Ticket.findAll({
         order: [['createdAt', 'DESC']],
@@ -71,9 +82,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
@@ -88,9 +105,13 @@ export default {
               clientId: id
             },
           }
-        : {};
+        : {
+          where: {
+            clientId: id,
+          }
+        };
 
-      const users = await users.Ticket.findAll({
+      const users = await models.User.findAll({
         order: [['createdAt', 'DESC']],
         limit: limit + 1,
         ...cursorOptions,
@@ -103,9 +124,15 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: toCursorHash(
-            edges[edges.length - 1].createdAt.toString(),
-          ),
+          endCursor: () => {
+            if (edges.length > 0){
+              return toCursorHash(
+                edges[edges.length - 1].createdAt.toString(),
+              )
+            } else {
+              return toCursorHash("")
+            }
+          },
         },
       };
     },
