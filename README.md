@@ -45,3 +45,6 @@ SECRET=asdlplplfwfwefwekwself.2342.dawasdq
 ```
 
 The `SECRET` is just a random string for your authentication. Keep all these information secure by adding the *.env* file to your *.gitignore* file. No third-party should have access to this information.
+
+#### Otros
+* las seeds se ejecutan si la bd esta vacia, en estas se crear los estados y roles.
